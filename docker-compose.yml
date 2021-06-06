@@ -4,7 +4,7 @@ services:
     image: postgres:13.3-alpine
     hostname: postgres
     ports:
-      - "5432:5432"
+      - "5433:5432"
     environment:
       - POSTGRES_DB=sales_order_db
       - POSTGRES_PASSWORD=postgres

@@ -21,14 +21,20 @@ public class SalesOrderFacade implements SalesOrderService {
     @Override
     public void create(OrderTO orderTO) {
         try {
-            log.info("Criando ordem de venda de externalId {}", orderTO.getExternalId());
-            OrderEntity orderEntity = new OrderEntity(
-                    orderTO.getExternalId(),
-                    orderTO.getClientDocument(),
-                    orderTO.getProductCode(),
-                    "CREATED"
-            );
-            repository.save(orderEntity);
+            OrderEntity orderEntityPersisted = repository.findByExternalId(orderTO.getExternalId());
+            if (orderEntityPersisted == null){
+                log.info("Criando ordem de venda de externalId {}", orderTO.getExternalId());
+                OrderEntity orderEntity = new OrderEntity(
+                        orderTO.getExternalId(),
+                        orderTO.getClientDocument(),
+                        orderTO.getProductCode(),
+                        "CREATED"
+                );
+                repository.save(orderEntity);
+            }
+            else {
+                log.warn("Ordem de venda com externalId {} já existente", orderTO.getExternalId());
+            }
         }
         catch (Exception e){
             log.error("Erro ao criar ordem de venda de externalId {} ", orderTO.getExternalId(), e);

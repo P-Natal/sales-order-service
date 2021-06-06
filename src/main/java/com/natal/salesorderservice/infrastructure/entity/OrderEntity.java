@@ -17,20 +17,20 @@ public class OrderEntity extends EntityClass {
     @Column(name = "client_document", nullable = false)
     private String clientDocument;
 
-    @Column(name = "status", nullable = false)
-    private String status;
-
     @Column(name = "product_code", nullable = false)
     private String productCode;
+
+    @Column(name = "status", nullable = false)
+    private String status;
 
     public OrderEntity() {
     }
 
-    public OrderEntity(String externalId, String clientDocument, String status, String productCode) {
+    public OrderEntity(String externalId, String clientDocument, String productCode, String status) {
         this.externalId = externalId;
         this.clientDocument = clientDocument;
-        this.status = status;
         this.productCode = productCode;
+        this.status = status;
     }
 
     @Override
