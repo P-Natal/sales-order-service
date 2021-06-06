@@ -1,0 +1,15 @@
+spring:
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        ddl-auto: none
+        show-sql: true
+  datasource:
+    url: jdbc:postgresql://localhost:5432/sales_order_db
+    username: postgres
+    password: postgres
+    driverClassName: org.postgresql.Driver
+    type: com.zaxxer.hikari.HikariDataSource
+  flyway:
+    enabled: true

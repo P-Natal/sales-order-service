@@ -1,8 +1,10 @@
-create table order
+create table "public"."order"
 (
     id              bigserial constraint firstkey primary key,
-    client_id       bigint not null,
-    product_id      bigint not null,
-    status          varchar(50) not null,
-    registry_date   date
+    external_id     varchar(50) not null,
+    client_document varchar(20) not null,
+    product_code    varchar(50) not null,
+    status          varchar(20) not null,
+    registry_date   timestamp not null,
+    last_update     timestamp not null
 );
