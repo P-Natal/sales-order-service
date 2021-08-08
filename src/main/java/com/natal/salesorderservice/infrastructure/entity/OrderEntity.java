@@ -8,7 +8,7 @@ import javax.persistence.Table;
 
 @Entity
 @Getter
-@Table(name = "order")
+@Table(name = "sales_order")
 public class OrderEntity extends EntityClass {
 
     @Column(name = "external_id", nullable = false)

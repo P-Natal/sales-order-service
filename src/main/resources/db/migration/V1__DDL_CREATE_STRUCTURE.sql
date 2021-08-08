@@ -1,7 +1,7 @@
-create table "public"."order"
+create table sales_order
 (
-    id              bigserial constraint firstkey primary key,
-    external_id     varchar(50) not null,
+    id              bigserial constraint order_key primary key,
+    external_id     varchar(100) not null,
     client_document varchar(20) not null,
     product_code    varchar(50) not null,
     status          varchar(20) not null,

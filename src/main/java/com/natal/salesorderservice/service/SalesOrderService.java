@@ -1,13 +1,14 @@
 package com.natal.salesorderservice.service;
 
-import com.natal.salesorderservice.controller.OrderTO;
+import com.natal.salesorderservice.controller.to.CreateOrderTO;
+import com.natal.salesorderservice.controller.to.OrderTO;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
 public interface SalesOrderService {
-    void create(OrderTO orderTO);
+    OrderTO create(CreateOrderTO createOrderTO);
     OrderTO getOrder(String externalId);
     List<OrderTO> getAll();
 }

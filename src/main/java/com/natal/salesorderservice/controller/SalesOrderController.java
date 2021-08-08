@@ -1,5 +1,7 @@
 package com.natal.salesorderservice.controller;
 
+import com.natal.salesorderservice.controller.to.CreateOrderTO;
+import com.natal.salesorderservice.controller.to.OrderTO;
 import com.natal.salesorderservice.service.SalesOrderService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,8 +18,8 @@ public class SalesOrderController {
     private SalesOrderService salesOrderService;
 
     @PostMapping
-    public void create(@RequestBody OrderTO orderTO){
-        salesOrderService.create(orderTO);
+    public OrderTO create(@RequestBody CreateOrderTO createOrderTO){
+        return salesOrderService.create(createOrderTO);
     }
 
     @GetMapping("/{externalId}")
@@ -26,7 +28,7 @@ public class SalesOrderController {
     }
 
     @GetMapping
-    public List<OrderTO> create(){
+    public List<OrderTO> getAllOrders(){
         return salesOrderService.getAll();
     }
 

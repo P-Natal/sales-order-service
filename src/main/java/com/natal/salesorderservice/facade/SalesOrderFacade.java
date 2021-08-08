@@ -1,6 +1,7 @@
 package com.natal.salesorderservice.facade;
 
-import com.natal.salesorderservice.controller.OrderTO;
+import com.natal.salesorderservice.controller.to.CreateOrderTO;
+import com.natal.salesorderservice.controller.to.OrderTO;
 import com.natal.salesorderservice.infrastructure.entity.OrderEntity;
 import com.natal.salesorderservice.infrastructure.repository.OrderRepository;
 import com.natal.salesorderservice.service.SalesOrderService;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Slf4j
 @Component
@@ -19,26 +21,35 @@ public class SalesOrderFacade implements SalesOrderService {
     private OrderRepository repository;
 
     @Override
-    public void create(OrderTO orderTO) {
+    public OrderTO create(CreateOrderTO createOrderTO) {
         try {
-            OrderEntity orderEntityPersisted = repository.findByExternalId(orderTO.getExternalId());
-            if (orderEntityPersisted == null){
-                log.info("Criando ordem de venda de externalId {}", orderTO.getExternalId());
-                OrderEntity orderEntity = new OrderEntity(
-                        orderTO.getExternalId(),
-                        orderTO.getClientDocument(),
-                        orderTO.getProductCode(),
-                        "CREATED"
-                );
-                repository.save(orderEntity);
-            }
-            else {
-                log.warn("Ordem de venda com externalId {} já existente", orderTO.getExternalId());
-            }
+            log.info("Criando ordem de venda: {}", createOrderTO.toString());
+            String externalId = gerarExternalId();
+            OrderEntity orderEntity = new OrderEntity(
+                    externalId,
+                    createOrderTO.getClientDocument(),
+                    createOrderTO.getProductCode(),
+                    "CREATED"
+            );
+            log.info("Persistindo ordem de venda: {}", orderEntity.toString());
+            OrderEntity persistedOrder = repository.save(orderEntity);
+            return new OrderTO(
+                    persistedOrder.getExternalId(),
+                    persistedOrder.getClientDocument(),
+                    persistedOrder.getProductCode(),
+                    persistedOrder.getStatus(),
+                    persistedOrder.getRegistryDate(),
+                    persistedOrder.getLastUpdate()
+            );
         }
         catch (Exception e){
-            log.error("Erro ao criar ordem de venda de externalId {} ", orderTO.getExternalId(), e);
+            log.error("Erro ao criar ordem de venda {} ", createOrderTO, e);
         }
+        return null;
+    }
+
+    private String gerarExternalId() {
+        return UUID.randomUUID().toString();
     }
 
     @Override
