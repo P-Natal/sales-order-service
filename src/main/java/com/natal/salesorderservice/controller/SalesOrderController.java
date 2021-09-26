@@ -2,6 +2,7 @@ package com.natal.salesorderservice.controller;
 
 import com.natal.salesorderservice.controller.to.CreateOrderTO;
 import com.natal.salesorderservice.controller.to.OrderTO;
+import com.natal.salesorderservice.controller.to.UpdateOrderTO;
 import com.natal.salesorderservice.service.SalesOrderService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +21,11 @@ public class SalesOrderController {
     @PostMapping
     public OrderTO create(@RequestBody CreateOrderTO createOrderTO){
         return salesOrderService.create(createOrderTO);
+    }
+
+    @PatchMapping
+    public OrderTO update(@RequestBody UpdateOrderTO updateOrderTO){
+        return salesOrderService.update(updateOrderTO);
     }
 
     @GetMapping("/{externalId}")

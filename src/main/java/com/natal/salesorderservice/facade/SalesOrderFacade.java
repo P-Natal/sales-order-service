@@ -6,6 +6,7 @@ import com.natal.salesorderservice.communication.Product;
 import com.natal.salesorderservice.communication.SubscriptionClient;
 import com.natal.salesorderservice.controller.to.CreateOrderTO;
 import com.natal.salesorderservice.controller.to.OrderTO;
+import com.natal.salesorderservice.controller.to.UpdateOrderTO;
 import com.natal.salesorderservice.infrastructure.entity.OrderEntity;
 import com.natal.salesorderservice.infrastructure.repository.OrderRepository;
 import com.natal.salesorderservice.service.SalesOrderService;
@@ -96,6 +97,26 @@ public class SalesOrderFacade implements SalesOrderService {
     public List<OrderTO> getAll() {
         log.info("Buscando ordens de venda persistidas no banco");
         return findOrders();
+    }
+
+    @Override
+    public OrderTO update(UpdateOrderTO updateOrderTO) {
+        OrderEntity existingOrderEntity = repository.findByExternalId(updateOrderTO.getExternalId());
+        if (existingOrderEntity == null){
+            log.info("Order com externalId {} não existe", updateOrderTO.getExternalId());
+            return null;
+        }
+        log.info("Atualizando ordem de externalId {} para status {}", updateOrderTO.getExternalId(), updateOrderTO.getStatus());
+        existingOrderEntity.setStatus(updateOrderTO.getStatus());
+        OrderEntity updatedOrderEntity = repository.save(existingOrderEntity);
+        return new OrderTO(
+                updatedOrderEntity.getExternalId(),
+                updatedOrderEntity.getClientDocument(),
+                updatedOrderEntity.getProductCode(),
+                updatedOrderEntity.getStatus(),
+                updatedOrderEntity.getRegistryDate(),
+                updatedOrderEntity.getLastUpdate()
+        );
     }
 
     private List<OrderTO> findOrders() {

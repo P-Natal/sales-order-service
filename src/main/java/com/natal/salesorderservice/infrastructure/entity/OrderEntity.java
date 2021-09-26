@@ -37,6 +37,10 @@ public class OrderEntity extends EntityClass {
         this.price = price;
     }
 
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
     @Override
     public String toString() {
         return "OrderEntity{" +
