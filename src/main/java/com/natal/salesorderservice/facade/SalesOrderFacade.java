@@ -1,5 +1,9 @@
 package com.natal.salesorderservice.facade;
 
+import com.natal.salesorderservice.communication.CatalogClient;
+import com.natal.salesorderservice.communication.ClientEligibility;
+import com.natal.salesorderservice.communication.Product;
+import com.natal.salesorderservice.communication.SubscriptionClient;
 import com.natal.salesorderservice.controller.to.CreateOrderTO;
 import com.natal.salesorderservice.controller.to.OrderTO;
 import com.natal.salesorderservice.infrastructure.entity.OrderEntity;
@@ -19,17 +23,48 @@ public class SalesOrderFacade implements SalesOrderService {
 
     @Autowired
     private OrderRepository repository;
+    @Autowired
+    private CatalogClient catalogClient;
+    @Autowired
+    private SubscriptionClient subscriptionClient;
+    @Autowired
+    private AntiFraudeFacade antiFraudeFacade;
 
     @Override
     public OrderTO create(CreateOrderTO createOrderTO) {
         try {
             log.info("Criando ordem de venda: {}", createOrderTO.toString());
             String externalId = gerarExternalId();
+            String clientDocument = createOrderTO.getClientDocument();
+            String productCode = createOrderTO.getProductCode();
+
+            Product product = catalogClient.getProduct(productCode);
+            ClientEligibility clientEligibility = subscriptionClient.getClientEligibility(clientDocument);
+            if (product==null){
+                log.info("Código de produto recebido não existe: {}", productCode);
+                return null;
+            }
+            else if (clientEligibility==null){
+                log.error("Falha na consulta de elegibilidade do cliente com documento: {}", clientDocument);
+                return null;
+            }
+            else if (!clientEligibility.isEligible()){
+                log.error("Cliente com documento {} não está elegível", clientDocument);
+                return null;
+            }
+            else if (antiFraudeFacade.excedeuLimiteDeOrdensPendentes(clientDocument)){
+                subscriptionClient.setClientEligibility(
+                        clientDocument,
+                        new ClientEligibility(false, "Limite de ordens pendentes")
+                );
+            }
+
             OrderEntity orderEntity = new OrderEntity(
                     externalId,
-                    createOrderTO.getClientDocument(),
-                    createOrderTO.getProductCode(),
-                    "CREATED"
+                    clientDocument,
+                    productCode,
+                    "CREATED",
+                    product.getPrice()
             );
             log.info("Persistindo ordem de venda: {}", orderEntity.toString());
             OrderEntity persistedOrder = repository.save(orderEntity);

@@ -16,3 +16,9 @@ spring:
     type: com.zaxxer.hikari.HikariDataSource
   flyway:
     enabled: true
+
+catalog:
+  host: localhost:8084
+
+subscription:
+  host: localhost:8082

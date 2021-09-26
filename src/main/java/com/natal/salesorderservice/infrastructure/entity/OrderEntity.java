@@ -23,14 +23,18 @@ public class OrderEntity extends EntityClass {
     @Column(name = "status", nullable = false)
     private String status;
 
+    @Column(name = "price")
+    private double price;
+
     public OrderEntity() {
     }
 
-    public OrderEntity(String externalId, String clientDocument, String productCode, String status) {
+    public OrderEntity(String externalId, String clientDocument, String productCode, String status, double price) {
         this.externalId = externalId;
         this.clientDocument = clientDocument;
         this.productCode = productCode;
         this.status = status;
+        this.price = price;
     }
 
     @Override
@@ -41,6 +45,7 @@ public class OrderEntity extends EntityClass {
                 ", client_document='" + clientDocument + '\'' +
                 ", product_code='" + productCode + '\'' +
                 ", status='" + status + '\'' +
+                ", price='" + price + '\'' +
                 ", registry_date='" + this.getRegistryDate() + '\'' +
                 ", last_update='" + this.getLastUpdate() + '\'' +
                 '}';
