@@ -7,6 +7,7 @@ import com.natal.salesorderservice.communication.SubscriptionClient;
 import com.natal.salesorderservice.controller.to.CreateOrderTO;
 import com.natal.salesorderservice.controller.to.OrderTO;
 import com.natal.salesorderservice.controller.to.UpdateOrderTO;
+import com.natal.salesorderservice.exception.NotFoundException;
 import com.natal.salesorderservice.infrastructure.entity.OrderEntity;
 import com.natal.salesorderservice.infrastructure.repository.OrderRepository;
 import com.natal.salesorderservice.service.SalesOrderService;
@@ -89,8 +90,12 @@ public class SalesOrderFacade implements SalesOrderService {
     }
 
     @Override
-    public OrderTO getOrder(String externalId) {
-        return findOrderByExternalId(externalId);
+    public OrderTO getOrder(String externalId) throws NotFoundException {
+        OrderTO order = findOrderByExternalId(externalId);
+        if (order==null){
+            throw new NotFoundException("Order with externalId "+externalId+" Not Found");
+        }
+        return order;
     }
 
     @Override

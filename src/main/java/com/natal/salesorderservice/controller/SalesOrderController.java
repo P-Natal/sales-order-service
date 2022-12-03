@@ -6,6 +6,8 @@ import com.natal.salesorderservice.controller.to.UpdateOrderTO;
 import com.natal.salesorderservice.service.SalesOrderService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,18 +21,36 @@ public class SalesOrderController {
     private SalesOrderService salesOrderService;
 
     @PostMapping
-    public OrderTO create(@RequestBody CreateOrderTO createOrderTO){
-        return salesOrderService.create(createOrderTO);
+    public ResponseEntity<OrderTO> create(@RequestBody CreateOrderTO createOrderTO){
+        try{
+            OrderTO order = salesOrderService.create(createOrderTO);
+            return new ResponseEntity<>(order, HttpStatus.CREATED);
+        }
+        catch (Exception e){
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @PatchMapping
-    public OrderTO update(@RequestBody UpdateOrderTO updateOrderTO){
-        return salesOrderService.update(updateOrderTO);
+    public ResponseEntity<OrderTO> update(@RequestBody UpdateOrderTO updateOrderTO){
+        try{
+            OrderTO order = salesOrderService.update(updateOrderTO);
+            return new ResponseEntity<>(order, HttpStatus.CREATED);
+        }
+        catch (Exception e){
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @GetMapping("/{externalId}")
-    public OrderTO getByExternalId(@PathVariable String externalId){
-        return salesOrderService.getOrder(externalId);
+    public ResponseEntity<OrderTO> getByExternalId(@PathVariable String externalId){
+        try{
+            OrderTO order = salesOrderService.getOrder(externalId);
+            return new ResponseEntity<>(order, HttpStatus.OK);
+        }
+        catch (Exception e){
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @GetMapping
