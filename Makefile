@@ -8,3 +8,13 @@ run-debug: start-db
 
 start-db:
 	docker-compose up -d
+
+build-image:
+	mvn clean package
+	docker build -t natal/sales-order-service:1.0 .
+
+build-run: build-image
+	docker-compose up
+
+build-run-d: build-image
+	docker-compose up -d

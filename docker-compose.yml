@@ -10,3 +10,11 @@ services:
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_USERNAME=postgres
     container_name: postgres_sales_order_service
+
+  sales-order-service:
+    image: natal/sales-order-service:1.0
+    ports:
+      - "8081:8081"
+    container_name: sales_order_service
+    depends_on:
+      - postgres
