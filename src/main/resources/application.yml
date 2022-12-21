@@ -16,6 +16,18 @@ spring:
     type: com.zaxxer.hikari.HikariDataSource
   flyway:
     enabled: true
+  rabbitmq:
+    host: localhost
+    username: guest
+    password: guest
+    port: 5672
+
+rabbitmq:
+  queue:
+    name: sales_order
+  exchange:
+    name: sales_order_exchange
+  routingkey: test_key
 
 catalog:
   host: localhost:8084

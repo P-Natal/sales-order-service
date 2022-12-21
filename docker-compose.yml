@@ -1,5 +1,13 @@
 version: '3'
 services:
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: 'rabbitmq'
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    network_mode: host
+
   postgres:
     image: postgres:13.3-alpine
     hostname: postgres
@@ -14,7 +22,7 @@ services:
   sales-order-service:
     image: natal/sales-order-service:1.0
     ports:
-      - "8081:8081"
+      - "8083:8083"
     container_name: sales_order_service
     depends_on:
       - postgres

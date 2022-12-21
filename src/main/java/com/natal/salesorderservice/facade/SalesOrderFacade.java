@@ -1,5 +1,8 @@
 package com.natal.salesorderservice.facade;
 
+import com.google.gson.Gson;
+import com.natal.salesorderservice.amqp.OrderPublisher;
+import com.natal.salesorderservice.amqp.SalesOrderEvent;
 import com.natal.salesorderservice.communication.CatalogClient;
 import com.natal.salesorderservice.communication.ClientEligibility;
 import com.natal.salesorderservice.communication.Product;
@@ -31,6 +34,9 @@ public class SalesOrderFacade implements SalesOrderService {
     private SubscriptionClient subscriptionClient;
     @Autowired
     private AntiFraudeFacade antiFraudeFacade;
+
+    @Autowired
+    private OrderPublisher orderPublisher;
 
     @Override
     public OrderTO create(CreateOrderTO createOrderTO) {
@@ -70,6 +76,7 @@ public class SalesOrderFacade implements SalesOrderService {
             );
             log.info("Persistindo ordem de venda: {}", orderEntity.toString());
             OrderEntity persistedOrder = repository.save(orderEntity);
+            publishOrder(persistedOrder);
             return new OrderTO(
                     persistedOrder.getExternalId(),
                     persistedOrder.getClientDocument(),
@@ -166,5 +173,17 @@ public class SalesOrderFacade implements SalesOrderService {
             orderTO = null;
         }
         return orderTO;
+    }
+
+    private void publishOrder(OrderEntity persistedOrder) {
+        SalesOrderEvent event = new SalesOrderEvent(
+                persistedOrder.getExternalId(),
+                persistedOrder.getClientDocument(),
+                persistedOrder.getProductCode(),
+                persistedOrder.getStatus(),
+                persistedOrder.getRegistryDate(),
+                persistedOrder.getLastUpdate()
+        );
+        orderPublisher.sendMessage(new Gson().toJson(event));
     }
 }
