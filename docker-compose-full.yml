@@ -1,0 +1,105 @@
+#version: '3'
+#services:
+#  rabbitmq:
+#    image: rabbitmq:3-management-alpine
+#    container_name: 'rabbitmq'
+#    ports:
+#      - "5672:5672"
+#      - "15672:15672"
+#    network_mode: host
+#
+### ELIGIBILITY
+##  eligibility_db:
+##    image: postgres:13.3-alpine
+##    hostname: postgres
+##    ports:
+##      - "5431:5431"
+##    environment:
+##      - POSTGRES_DB=eligibility_db
+##      - POSTGRES_PASSWORD=postgres
+##      - POSTGRES_USERNAME=postgres
+##    container_name: postgres_eligibility_service
+##  eligibility-service:
+##    image: natal/eligibility-service:1.0
+##    ports:
+##      - "8081:8081"
+##    container_name: eligibility_service
+##    depends_on:
+##      - eligibility_db
+##
+### SUBSCRIPTION
+##  subscription_db:
+##    image: postgres:13.3-alpine
+##    hostname: postgres
+##    ports:
+##      - "5432:5432"
+##    environment:
+##      - POSTGRES_DB=subscription_db
+##      - POSTGRES_PASSWORD=postgres
+##      - POSTGRES_USERNAME=postgres
+##    container_name: postgres_subscription_service
+##  subscription-service:
+##    image: natal/subscription-service:1.0
+##    ports:
+##      - "8082:8082"
+##    container_name: subscription_service
+##    depends_on:
+##      - subscription_db
+#
+## SALES_ORDER
+#  sales_order_db:
+#    image: postgres:13.3-alpine
+#    hostname: postgres
+#    ports:
+#      - "5433:5433"
+#    environment:
+#      - POSTGRES_DB=sales_order_db
+#      - POSTGRES_PASSWORD=postgres
+#      - POSTGRES_USERNAME=postgres
+#    container_name: postgres_sales_order_service
+#  sales-order-service:
+#    image: natal/sales-order-service:1.0
+#    ports:
+#      - "8083:8083"
+#    container_name: sales_order_service
+#    depends_on:
+#      - sales_order_db
+#
+### CATALOG
+##  catalog_db:
+##    image: postgres:9.6-alpine
+##    hostname: postgres
+##    ports:
+##      - "5434:5434"
+##    environment:
+##      - POSTGRES_DB=catalogdb
+##      - POSTGRES_USERNAME=postgres
+##      - POSTGRES_PASSWORD=postgres
+##    container_name: postgres_catalog
+##  catalog-service:
+##    image: natal/catalog-service:1.0
+##    ports:
+##      - "8084:8084"
+##    container_name: catalog_service
+##    depends_on:
+##      - catalog_db
+##
+### DELIVERY
+##  delivery_db:
+##    image: postgres:13.3-alpine
+##    hostname: postgres
+##    ports:
+##      - "5435:5435"
+##    environment:
+##      - POSTGRES_DB=delivery_db
+##      - POSTGRES_PASSWORD=postgres
+##      - POSTGRES_USERNAME=postgres
+##    container_name: postgres_delivery_service
+##    network_mode: host
+##  delivery-service:
+##    image: natal/delivery-service:1.0
+##    ports:
+##      - "8085:8085"
+##    container_name: delivery_service
+##    depends_on:
+##      - delivery_db
