@@ -9,7 +9,7 @@ spring:
         show-sql: true
         format_sql: true
   datasource:
-    url: jdbc:postgresql://postgres:5432/sales_order_db
+    url: jdbc:postgresql://postgres-sales-order:5432/sales_order_db
     username: postgres
     password: postgres
     driverClassName: org.postgresql.Driver
@@ -17,7 +17,7 @@ spring:
   flyway:
     enabled: true
   rabbitmq:
-    host: localhost
+    host: rabbitmq
     username: guest
     password: guest
     port: 5672
@@ -27,7 +27,7 @@ rabbitmq:
     name: sales_order
   exchange:
     name: sales_order_exchange
-  routingkey: test_key
+  routingkey: "*"
 
 catalog:
   host: localhost:8084
