@@ -30,7 +30,7 @@ rabbitmq:
   routingkey: "*"
 
 catalog:
-  host: localhost:8084
+  host: catalog-service:8084
 
 subscription:
-  host: localhost:8082
+  host: subscription-service:8082
