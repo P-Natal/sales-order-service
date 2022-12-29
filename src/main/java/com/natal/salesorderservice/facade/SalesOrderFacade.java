@@ -1,7 +1,5 @@
 package com.natal.salesorderservice.facade;
 
-import com.google.gson.Gson;
-import com.natal.salesorderservice.amqp.OrderPublisher;
 import com.natal.salesorderservice.amqp.SalesOrderEvent;
 import com.natal.salesorderservice.communication.CatalogClient;
 import com.natal.salesorderservice.communication.ClientEligibility;
@@ -11,11 +9,14 @@ import com.natal.salesorderservice.controller.to.CreateOrderTO;
 import com.natal.salesorderservice.controller.to.OrderTO;
 import com.natal.salesorderservice.controller.to.UpdateOrderTO;
 import com.natal.salesorderservice.exception.NotFoundException;
+import com.natal.salesorderservice.exception.AntiFraudeException;
+import com.natal.salesorderservice.exception.EligibilityException;
 import com.natal.salesorderservice.infrastructure.entity.OrderEntity;
 import com.natal.salesorderservice.infrastructure.repository.OrderRepository;
 import com.natal.salesorderservice.service.SalesOrderService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -35,8 +36,8 @@ public class SalesOrderFacade implements SalesOrderService {
     @Autowired
     private AntiFraudeFacade antiFraudeFacade;
 
-    @Autowired
-    private OrderPublisher orderPublisher;
+//    @Autowired
+//    private OrderPublisher orderPublisher;
 
     @Override
     public OrderTO create(CreateOrderTO createOrderTO) {
@@ -46,25 +47,25 @@ public class SalesOrderFacade implements SalesOrderService {
             String clientDocument = createOrderTO.getClientDocument();
             String productCode = createOrderTO.getProductCode();
 
-            Product product = catalogClient.getProduct(productCode);
-            ClientEligibility clientEligibility = subscriptionClient.getClientEligibility(clientDocument);
-            if (product==null){
-                log.info("Código de produto recebido não existe: {}", productCode);
-                return null;
+            ResponseEntity<Product> productResponse = catalogClient.getProduct(productCode);
+            ResponseEntity<ClientEligibility> clientEligibilityResponse = subscriptionClient.getClientEligibility(clientDocument);
+            if (!productResponse.hasBody()){
+                log.info("Código de produto recebido não encontrado: {}", productCode);
+                throw new RuntimeException("Código de produto recebido não encontrado: {}"+ productCode);
             }
-            else if (clientEligibility==null){
-                log.error("Falha na consulta de elegibilidade do cliente com documento: {}", clientDocument);
-                return null;
+            else if (!clientEligibilityResponse.hasBody()){
+                throw new RuntimeException("Falha na consulta de elegibilidade do cliente com documento: "+ clientDocument);
             }
-            else if (!clientEligibility.isEligible()){
-                log.error("Cliente com documento {} não está elegível", clientDocument);
-                return null;
+            else if (!clientEligibilityResponse.getBody().isEligible()){
+                log.error("Cliente com documento {} nao esta elegivel", clientDocument);
+                throw new EligibilityException(clientEligibilityResponse.getBody().getReason());
             }
             else if (antiFraudeFacade.excedeuLimiteDeOrdensPendentes(clientDocument)){
                 subscriptionClient.setClientEligibility(
                         clientDocument,
                         new ClientEligibility(false, "Limite de ordens pendentes")
                 );
+                throw new AntiFraudeException("Limite de ordens pendentes");
             }
 
             OrderEntity orderEntity = new OrderEntity(
@@ -72,7 +73,7 @@ public class SalesOrderFacade implements SalesOrderService {
                     clientDocument,
                     productCode,
                     "CREATED",
-                    product.getPrice()
+                    productResponse.getBody().getPrice()
             );
             log.info("Persistindo ordem de venda: {}", orderEntity.toString());
             OrderEntity persistedOrder = repository.save(orderEntity);
@@ -87,9 +88,9 @@ public class SalesOrderFacade implements SalesOrderService {
             );
         }
         catch (Exception e){
-            log.error("Erro ao criar ordem de venda {} ", createOrderTO, e);
+            log.error("Erro ao criar ordem de venda {} - {}", createOrderTO, e.getMessage());
+            throw e;
         }
-        return null;
     }
 
     private String gerarExternalId() {
@@ -184,6 +185,6 @@ public class SalesOrderFacade implements SalesOrderService {
                 persistedOrder.getRegistryDate(),
                 persistedOrder.getLastUpdate()
         );
-        orderPublisher.sendMessage(new Gson().toJson(event));
+//        orderPublisher.sendMessage(new Gson().toJson(event));
     }
 }

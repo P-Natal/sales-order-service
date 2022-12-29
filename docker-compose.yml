@@ -6,8 +6,6 @@ services:
     ports:
       - "5672:5672"
       - "15672:15672"
-    networks:
-      - localnet
 
   postgres-sales-order:
     image: postgres:13.3-alpine
@@ -19,20 +17,3 @@ services:
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_USERNAME=postgres
     container_name: postgres_sales_order_service
-    networks:
-      - localnet
-
-  sales-order-service:
-    image: natal/sales-order-service:1.0
-    ports:
-      - "8083:8083"
-    container_name: sales_order_service
-    depends_on:
-      - postgres-sales-order
-      - rabbitmq
-    networks:
-      - localnet
-
-networks:
-  localnet:
-    driver: bridge
