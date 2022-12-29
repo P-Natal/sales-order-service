@@ -13,5 +13,5 @@ public interface SalesOrderService {
     OrderTO create(CreateOrderTO createOrderTO);
     OrderTO getOrder(String externalId) throws NotFoundException;
     List<OrderTO> getAll();
-    OrderTO update(UpdateOrderTO updateOrderTO);
+    OrderTO update(String externalId, UpdateOrderTO updateOrderTO);
 }

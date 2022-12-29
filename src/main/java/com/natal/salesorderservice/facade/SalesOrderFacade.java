@@ -1,5 +1,7 @@
 package com.natal.salesorderservice.facade;
 
+import com.google.gson.Gson;
+import com.natal.salesorderservice.amqp.OrderPublisher;
 import com.natal.salesorderservice.amqp.SalesOrderEvent;
 import com.natal.salesorderservice.communication.CatalogClient;
 import com.natal.salesorderservice.communication.ClientEligibility;
@@ -8,6 +10,7 @@ import com.natal.salesorderservice.communication.SubscriptionClient;
 import com.natal.salesorderservice.controller.to.CreateOrderTO;
 import com.natal.salesorderservice.controller.to.OrderTO;
 import com.natal.salesorderservice.controller.to.UpdateOrderTO;
+import com.natal.salesorderservice.exception.InvalidStatusException;
 import com.natal.salesorderservice.exception.NotFoundException;
 import com.natal.salesorderservice.exception.AntiFraudeException;
 import com.natal.salesorderservice.exception.EligibilityException;
@@ -20,6 +23,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -36,8 +40,8 @@ public class SalesOrderFacade implements SalesOrderService {
     @Autowired
     private AntiFraudeFacade antiFraudeFacade;
 
-//    @Autowired
-//    private OrderPublisher orderPublisher;
+    @Autowired
+    private OrderPublisher orderPublisher;
 
     @Override
     public OrderTO create(CreateOrderTO createOrderTO) {
@@ -113,13 +117,16 @@ public class SalesOrderFacade implements SalesOrderService {
     }
 
     @Override
-    public OrderTO update(UpdateOrderTO updateOrderTO) {
-        OrderEntity existingOrderEntity = repository.findByExternalId(updateOrderTO.getExternalId());
-        if (existingOrderEntity == null){
-            log.info("Order com externalId {} não existe", updateOrderTO.getExternalId());
-            return null;
+    public OrderTO update(String externalId, UpdateOrderTO updateOrderTO) {
+        if(!isStatusValid(updateOrderTO.getStatus())){
+            throw new InvalidStatusException("Status recebido nao e valido - "+updateOrderTO.getStatus());
         }
-        log.info("Atualizando ordem de externalId {} para status {}", updateOrderTO.getExternalId(), updateOrderTO.getStatus());
+
+        OrderEntity existingOrderEntity = repository.findByExternalId(externalId);
+        if (existingOrderEntity == null){
+            throw new NotFoundException("Order com externalId "+externalId+" não existe");
+        }
+        log.info("Atualizando ordem de externalId {} para status {}", externalId, updateOrderTO.getStatus());
         existingOrderEntity.setStatus(updateOrderTO.getStatus());
         OrderEntity updatedOrderEntity = repository.save(existingOrderEntity);
         return new OrderTO(
@@ -130,6 +137,14 @@ public class SalesOrderFacade implements SalesOrderService {
                 updatedOrderEntity.getRegistryDate(),
                 updatedOrderEntity.getLastUpdate()
         );
+    }
+
+    private boolean isStatusValid(String status) {
+        List<String> validStatus = Arrays.asList("CREATED","CANCELED","CONCLUDED");
+        if (!validStatus.contains(status)){
+            return false;
+        }
+        return true;
     }
 
     private List<OrderTO> findOrders() {
@@ -185,6 +200,6 @@ public class SalesOrderFacade implements SalesOrderService {
                 persistedOrder.getRegistryDate(),
                 persistedOrder.getLastUpdate()
         );
-//        orderPublisher.sendMessage(new Gson().toJson(event));
+        orderPublisher.sendMessage(new Gson().toJson(event));
     }
 }

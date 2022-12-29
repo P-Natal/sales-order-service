@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-//@Configuration
+@Configuration
 public class RabbitMQConfiguration {
 
     @Value("${rabbitmq.queue.name}")
@@ -40,9 +40,4 @@ public class RabbitMQConfiguration {
                 .to(exchange())
                 .with(routingKey);
     }
-
-// Spring boot autoconfiguration provides following beans
-    // ConnectionFactory
-    // RabbitTemplate
-    // RabbitAdmin
 }

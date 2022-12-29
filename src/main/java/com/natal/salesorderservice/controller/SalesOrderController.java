@@ -5,6 +5,8 @@ import com.natal.salesorderservice.controller.to.OrderTO;
 import com.natal.salesorderservice.controller.to.UpdateOrderTO;
 import com.natal.salesorderservice.exception.AntiFraudeException;
 import com.natal.salesorderservice.exception.EligibilityException;
+import com.natal.salesorderservice.exception.InvalidStatusException;
+import com.natal.salesorderservice.exception.NotFoundException;
 import com.natal.salesorderservice.service.SalesOrderService;
 import feign.FeignException;
 import lombok.extern.slf4j.Slf4j;
@@ -15,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
+import java.util.UUID;
 
 @Slf4j
 @RestController
@@ -43,11 +46,17 @@ public class SalesOrderController {
         }
     }
 
-    @PatchMapping
-    public ResponseEntity<OrderTO> update(@RequestBody UpdateOrderTO updateOrderTO){
+    @PatchMapping("/{externalId}")
+    public ResponseEntity<?> update(@PathVariable String externalId, @RequestBody UpdateOrderTO updateOrderTO){
         try{
-            OrderTO order = salesOrderService.update(updateOrderTO);
-            return new ResponseEntity<>(order, HttpStatus.CREATED);
+            OrderTO order = salesOrderService.update(externalId, updateOrderTO);
+            return new ResponseEntity<>(order, HttpStatus.OK);
+        }
+        catch (NotFoundException e){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        catch (InvalidStatusException e){
+            return new ResponseEntity<>(e.getMessage(),HttpStatus.UNPROCESSABLE_ENTITY);
         }
         catch (Exception e){
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -57,8 +66,17 @@ public class SalesOrderController {
     @GetMapping("/{externalId}")
     public ResponseEntity<OrderTO> getByExternalId(@PathVariable String externalId){
         try{
+            UUID.fromString(externalId);
+        }
+        catch (IllegalArgumentException e){
+            return new ResponseEntity<>(HttpStatus.UNPROCESSABLE_ENTITY);
+        }
+        try{
             OrderTO order = salesOrderService.getOrder(externalId);
             return new ResponseEntity<>(order, HttpStatus.OK);
+        }
+        catch (NotFoundException e){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         catch (Exception e){
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -66,8 +84,12 @@ public class SalesOrderController {
     }
 
     @GetMapping
-    public List<OrderTO> getAllOrders(){
-        return salesOrderService.getAll();
+    public ResponseEntity<?> getAllOrders(){
+        List<OrderTO> orders = salesOrderService.getAll();
+        if (!orders.isEmpty()){
+            return ResponseEntity.ok(orders);
+        }
+        return ResponseEntity.noContent().build();
     }
 
 }
