@@ -20,7 +20,7 @@ public class AntiFraudeFacade {
         List<OrderEntity> ordensPendentes = orderRepository.findByClientDocumentAndStatus(clientDocument, "CREATED");
         if (ordensPendentes != null){
             log.info("Cliente com documento {} possui {} ordens pendentes", clientDocument, ordensPendentes.size());
-            if (ordensPendentes.size() > 3){
+            if (ordensPendentes.size() > 2){
                 return true;
             }
         }

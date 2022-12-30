@@ -92,7 +92,7 @@ public class SalesOrderController {
         return ResponseEntity.noContent().build();
     }
 
-    @PatchMapping("/{document}")
+    @PutMapping("/cancel/{document}")
     public ResponseEntity cancelOrdersbyDocument(@PathVariable String document){
         try{
             salesOrderService.cancelOrdersByDocument(document);
