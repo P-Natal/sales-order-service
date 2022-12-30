@@ -92,4 +92,18 @@ public class SalesOrderController {
         return ResponseEntity.noContent().build();
     }
 
+    @PatchMapping("/{document}")
+    public ResponseEntity cancelOrdersbyDocument(@PathVariable String document){
+        try{
+            salesOrderService.cancelOrdersByDocument(document);
+            return new ResponseEntity<>(HttpStatus.OK);
+        }
+        catch (NotFoundException e){
+            return new ResponseEntity<>(HttpStatus.OK);
+        }
+        catch (Exception e){
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
 }

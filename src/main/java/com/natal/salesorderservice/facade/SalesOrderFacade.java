@@ -191,6 +191,15 @@ public class SalesOrderFacade implements SalesOrderService {
         return orderTO;
     }
 
+
+    public void cancelOrdersByDocument(String document){
+        List<OrderEntity> orders = repository.findByClientDocument(document);
+        for (OrderEntity order : orders){
+            order.setStatus("CANCELED");
+            repository.save(order);
+        }
+    }
+
     private void publishOrder(OrderEntity persistedOrder) {
         SalesOrderEvent event = new SalesOrderEvent(
                 persistedOrder.getExternalId(),

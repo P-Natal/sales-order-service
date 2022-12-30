@@ -9,7 +9,7 @@ import java.util.List;
 
 @Repository
 public interface OrderRepository extends JpaRepository<OrderEntity, Long> {
-    OrderEntity findByClientDocument(String document);
+    List<OrderEntity> findByClientDocument(String document);
     OrderEntity findByExternalId(String externalId);
 
     @Query("SELECT o FROM OrderEntity o WHERE o.clientDocument = ?1 AND o.status = ?2")
